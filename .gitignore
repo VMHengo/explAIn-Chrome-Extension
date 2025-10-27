@@ -1,0 +1,6 @@
+# This file is used to ignore files which are generated
+# ----------------------------------------------------------------------------
+
+# Ignore configs
+config.js
+models.json
