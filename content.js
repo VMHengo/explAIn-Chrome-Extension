@@ -54,66 +54,38 @@ function showPopup(explanation, selectedText) {
 
   // Header for heading and close btn
   const header = document.createElement('div');
-  header.style.display = 'flex';
-  header.style.justifyContent = 'space-between';
-  header.style.alignItems = 'center';
-  header.style.marginBottom = '4px';
+  header.className = 'popup-header';
 
-  // Heading
   const heading = document.createElement('div');
-  heading.innerText = `${(selectedText || '').toString().toLowerCase()} - explAIn`;
-  heading.style.fontWeight = 'bold';
-  heading.style.fontSize = '20px';
-  heading.style.textDecoration = 'none';
-  heading.style.alignSelf = 'flex-end';
+  heading.className = 'popup-heading';
+  heading.innerText = (selectedText || '').toString();
 
-  // Close button
   const closeBtn = document.createElement('button');
+  closeBtn.className = 'popup-close-btn';
   closeBtn.innerText = '×';
-  closeBtn.style.alignSelf = 'flex-start';
-  closeBtn.style.background = 'transparent';
-  closeBtn.style.border = 'none';
-  closeBtn.style.fontSize = '16px';
-  closeBtn.style.cursor = 'pointer';
-  closeBtn.style.padding = '0';
-  closeBtn.style.margin = '0';
   closeBtn.title = 'Close';
-
-  closeBtn.addEventListener('mouseenter', () => {
-    closeBtn.style.color = 'red';
-  });
-  closeBtn.addEventListener('mouseleave', () => {
-    closeBtn.style.color = '#333';
-  });
   closeBtn.addEventListener('click', () => popup.remove());
+
+  const content = document.createElement('div');
+  content.className = 'popup-content';
+  content.innerText = explanation;
+
+  const copyBtn = document.createElement('button');
+  copyBtn.className = 'popup-copy-btn';
+  copyBtn.innerText = 'Copy';
+  copyBtn.title = 'Copy to clipboard';
+  copyBtn.addEventListener('click', () => {
+    navigator.clipboard.writeText(explanation);
+    copyBtn.innerText = 'Copied!';
+    copyBtn.style.color = 'green';
+  });
 
   header.appendChild(heading);
   header.appendChild(closeBtn);
-  
-  // Clipboard button
-  const copyToClipboardBtn = document.createElement('button');
-  copyToClipboardBtn.innerText = 'Copy';
-  copyToClipboardBtn.style.alignSelf = 'flex-end';
-  copyToClipboardBtn.style.background = 'transparent';
-  copyToClipboardBtn.style.border = 'none';
-  copyToClipboardBtn.style.fontSize = '12px';
-  copyToClipboardBtn.style.cursor = 'pointer';
-  copyToClipboardBtn.style.padding = '0';
-  copyToClipboardBtn.style.margin = '0';
-  copyToClipboardBtn.title = 'Copy to clipboard';
 
-  copyToClipboardBtn.addEventListener('click', () => {
-    navigator.clipboard.writeText(explanation);
-    copyToClipboardBtn.innerText = 'Copied!';;
-    copyToClipboardBtn.style.color = 'green';
-  });
-
-  const content = document.createElement('div');
-  content.innerText = explanation;
-  
   popup.appendChild(header);
   popup.appendChild(content);
-  popup.appendChild(copyToClipboardBtn);
+  popup.appendChild(copyBtn);
 
   document.body.appendChild(popup);
 }
