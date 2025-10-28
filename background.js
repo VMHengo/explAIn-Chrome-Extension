@@ -2,17 +2,21 @@ import { API_KEY } from './config.js';
 
 chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
   if (message.action === 'explain') {
+    const selectedText = message.text;
+
     getExplanation(message.text)
       .then((explanation) => {
         chrome.tabs.sendMessage(sender.tab.id, {
           action: 'showExplanation',
-          text: explanation
+          text: explanation,
+          selectedText: selectedText
         });
       })
       .catch((err) => {
         chrome.tabs.sendMessage(sender.tab.id, {
           action: 'showExplanation',
-          text: "Error fetching explanation."
+          text: "Error fetching explanation.",
+          selectedText: selectedText
         });
         console.error(err);
       });

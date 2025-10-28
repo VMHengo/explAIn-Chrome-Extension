@@ -39,53 +39,82 @@ function removeExplainButton() {
 }
 
 chrome.runtime.onMessage.addListener((message) => {
-    console.log("📩 Message received in content.js:", message);
-    if (message.action === 'showExplanation') {
-      showPopup(message.text);
-    }
-  });
-  
-  function showPopup(explanation) {
-    const popup = document.createElement('div');
-    popup.id = 'explAIn-popup';
-    popup.style.position = 'fixed';
-    popup.style.top = '10px';
-    popup.style.right = '10px';
-    popup.style.background = '#fff';
-    popup.style.border = '1px solid #ccc';
-    popup.style.padding = '12px 12px 12px 16px';
-    popup.style.borderRadius = '8px';
-    popup.style.boxShadow = '0 2px 10px rgba(0,0,0,0.2)';
-    popup.style.maxWidth = '300px';
-    popup.style.zIndex = 10000;
-    popup.style.display = 'flex';
-    popup.style.flexDirection = 'column';
-    popup.style.gap = '8px';
-  
-    // Create the close button
-    const closeBtn = document.createElement('button');
-    closeBtn.innerText = '×'; // "X" symbol
-    closeBtn.style.alignSelf = 'flex-end';
-    closeBtn.style.background = 'transparent';
-    closeBtn.style.border = 'none';
-    closeBtn.style.fontSize = '16px';
-    closeBtn.style.cursor = 'pointer';
-    closeBtn.style.padding = '0';
-    closeBtn.style.margin = '0';
-    closeBtn.title = 'Close';
-  
-    // Add click listener to remove popup
-    closeBtn.addEventListener('click', () => popup.remove());
-  
-    // Add content
-    const content = document.createElement('div');
-    content.innerText = explanation;
-  
-    // Append close button and content to popup
-    popup.appendChild(closeBtn);
-    popup.appendChild(content);
-  
-    // Add popup to the page
-    document.body.appendChild(popup);
+  console.log("📩 Message received in content.js:", message);
+  if (message.action === 'showExplanation') {
+    showPopup(message.text, message.selectedText);
   }
+});
+  
+function showPopup(explanation, selectedText) {
+  const existingPopup = document.getElementById('explAIn-popup');
+  if (existingPopup) existingPopup.remove();
+
+  const popup = document.createElement('div');
+  popup.id = 'explAIn-popup';
+
+  // Header for heading and close btn
+  const header = document.createElement('div');
+  header.style.display = 'flex';
+  header.style.justifyContent = 'space-between';
+  header.style.alignItems = 'center';
+  header.style.marginBottom = '4px';
+
+  // Heading
+  const heading = document.createElement('div');
+  heading.innerText = `${(selectedText || '').toString().toLowerCase()} - explAIn`;
+  heading.style.fontWeight = 'bold';
+  heading.style.fontSize = '20px';
+  heading.style.textDecoration = 'none';
+  heading.style.alignSelf = 'flex-end';
+
+  // Close button
+  const closeBtn = document.createElement('button');
+  closeBtn.innerText = '×';
+  closeBtn.style.alignSelf = 'flex-start';
+  closeBtn.style.background = 'transparent';
+  closeBtn.style.border = 'none';
+  closeBtn.style.fontSize = '16px';
+  closeBtn.style.cursor = 'pointer';
+  closeBtn.style.padding = '0';
+  closeBtn.style.margin = '0';
+  closeBtn.title = 'Close';
+
+  closeBtn.addEventListener('mouseenter', () => {
+    closeBtn.style.color = 'red';
+  });
+  closeBtn.addEventListener('mouseleave', () => {
+    closeBtn.style.color = '#333';
+  });
+  closeBtn.addEventListener('click', () => popup.remove());
+
+  header.appendChild(heading);
+  header.appendChild(closeBtn);
+  
+  // Clipboard button
+  const copyToClipboardBtn = document.createElement('button');
+  copyToClipboardBtn.innerText = 'Copy';
+  copyToClipboardBtn.style.alignSelf = 'flex-end';
+  copyToClipboardBtn.style.background = 'transparent';
+  copyToClipboardBtn.style.border = 'none';
+  copyToClipboardBtn.style.fontSize = '12px';
+  copyToClipboardBtn.style.cursor = 'pointer';
+  copyToClipboardBtn.style.padding = '0';
+  copyToClipboardBtn.style.margin = '0';
+  copyToClipboardBtn.title = 'Copy to clipboard';
+
+  copyToClipboardBtn.addEventListener('click', () => {
+    navigator.clipboard.writeText(explanation);
+    copyToClipboardBtn.innerText = 'Copied!';;
+    copyToClipboardBtn.style.color = 'green';
+  });
+
+  const content = document.createElement('div');
+  content.innerText = explanation;
+  
+  popup.appendChild(header);
+  popup.appendChild(content);
+  popup.appendChild(copyToClipboardBtn);
+
+  document.body.appendChild(popup);
+}
   
