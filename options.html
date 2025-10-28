@@ -1,0 +1,38 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Extension Settings</title>
+  <style>
+    body { font-family: sans-serif; padding: 20px; }
+    label { display: block; margin: 10px 0; }
+  </style>
+</head>
+<body>
+  <h1>Extension Settings</h1>
+
+  <label>
+    <input type="checkbox" id="includeUrl">
+    Include page URL in context
+  </label>
+
+  <label>
+    Context length (chars around selection):
+    <input type="number" id="contextLength" min="50" max="1000" value="200">
+  </label>
+
+  <button id="saveBtn">Save Settings</button>
+
+  <script src="options.js"></script>
+</body>
+<label>
+    Select language for explanations:
+    <select id="languageSelect">
+      <option value="en">English</option>
+      <option value="es">Spanish</option>
+      <option value="fr">French</option>
+      <option value="de">German</option>
+      <option value="it">Italian</option>
+      <!-- Add more languages as needed -->
+    </select>
+  </label>
+</html>

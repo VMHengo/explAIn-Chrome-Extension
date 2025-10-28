@@ -1,17 +1,24 @@
-console.log("content.js loaded");
+console.log("content.js loaded"); // confirmation
+
+
+// --- Explain button ---
 
 let explainButton;
 
 document.addEventListener('mouseup', (event) => {
-  const selection = window.getSelection().toString().trim();
-  if (selection.length > 0) {
-    showExplainButton(event.pageX, event.pageY, selection);
+  const selection = window.getSelection();
+  const selectedText = selection.toString().trim();
+  const pageUrl = window.location.href;
+
+  if (selectedText.length > 0) {
+    const context = getContextFromSelection(selection);
+    showExplainButton(event.pageX, event.pageY, selectedText, context, pageUrl);
   } else {
     removeExplainButton();
   }
 });
 
-function showExplainButton(x, y, text) {
+function showExplainButton(x, y, selectedText, context, pageUrl) {
   removeExplainButton();
 
   explainButton = document.createElement('button');
@@ -28,8 +35,13 @@ function showExplainButton(x, y, text) {
   document.body.appendChild(explainButton);
 
   explainButton.addEventListener('click', () => {
-    console.log("🔹 Explain button clicked. Sending message:", text);
-    chrome.runtime.sendMessage({ action: 'explain', text });
+    console.log("🔹 Explain button clicked. Sending message:", selectedText);
+    chrome.runtime.sendMessage({ 
+      action: 'explain', 
+      text: selectedText,
+      context: context,
+      url: pageUrl
+    });
     removeExplainButton();
   });
 }
@@ -44,7 +56,10 @@ chrome.runtime.onMessage.addListener((message) => {
     showPopup(message.text, message.selectedText);
   }
 });
-  
+
+
+// --- Main popup ---
+
 function showPopup(explanation, selectedText) {
   const existingPopup = document.getElementById('explAIn-popup');
   if (existingPopup) existingPopup.remove();
@@ -89,4 +104,15 @@ function showPopup(explanation, selectedText) {
 
   document.body.appendChild(popup);
 }
-  
+
+
+// --- helper functions ---
+
+function getContextFromSelection(selection) {
+  if (!selection || selection.rangeCount === 0) return "";
+
+  const range = selection.getRangeAt(0);
+  const parentElement = range.startContainer.parentNode;
+
+  return parentElement.innerText.trim();
+}
