@@ -11,14 +11,13 @@ document.addEventListener('mouseup', (event) => {
   const pageUrl = window.location.href;
 
   if (selectedText.length > 0) {
-    const context = getContextFromSelection(selection);
-    showExplainButton(event.pageX, event.pageY, selectedText, context, pageUrl);
+    showExplainButton(event.pageX, event.pageY, selection, selectedText, pageUrl);
   } else {
     removeExplainButton();
   }
 });
 
-function showExplainButton(x, y, selectedText, context, pageUrl) {
+function showExplainButton(x, y, selection, selectedText, pageUrl) {
   removeExplainButton();
 
   explainButton = document.createElement('button');
@@ -35,12 +34,12 @@ function showExplainButton(x, y, selectedText, context, pageUrl) {
   document.body.appendChild(explainButton);
 
   explainButton.addEventListener('click', () => {
-    console.log("🔹 Explain button clicked. Sending message:", selectedText);
+    const context = getContextFromSelection(selection);
     chrome.runtime.sendMessage({ 
       action: 'explain', 
-      text: selectedText,
+      selectedText: selectedText,
+      url: pageUrl,
       context: context,
-      url: pageUrl
     });
     removeExplainButton();
   });
@@ -51,23 +50,21 @@ function removeExplainButton() {
 }
 
 chrome.runtime.onMessage.addListener((message) => {
-  console.log("📩 Message received in content.js:", message);
   if (message.action === 'showExplanation') {
-    showPopup(message.text, message.selectedText);
+    showPopup(message.text, message.selectedText, message.context, message.url);
   }
 });
 
 
 // --- Main popup ---
 
-function showPopup(explanation, selectedText) {
+function showPopup(explanation, selectedText, context, url) {
   const existingPopup = document.getElementById('explAIn-popup');
   if (existingPopup) existingPopup.remove();
 
   const popup = document.createElement('div');
   popup.id = 'explAIn-popup';
 
-  // Header for heading and close btn
   const header = document.createElement('div');
   header.className = 'popup-header';
 
@@ -85,9 +82,30 @@ function showPopup(explanation, selectedText) {
   content.className = 'popup-content';
   content.innerText = explanation;
 
+  const footer = document.createElement('div');
+  footer.className = 'popup-footer';
+
+  const feedbackInput = document.createElement('textarea');
+  feedbackInput.className = 'popup-feedback-input';
+  feedbackInput.placeholder = 'Give instructions... ';
+  feedbackInput.rows = 2;
+  feedbackInput.addEventListener('keydown', (e) => {
+    if (e.key === 'Enter' && !e.shiftKey) {
+      feedbackInput.blur();
+      const pageUrl = window.location.href;
+      chrome.runtime.sendMessage({
+        action: 'sendFeedback',
+        selectedText: selectedText,
+        context: context,
+        url: pageUrl,
+        feedback: feedbackInput.value,
+      });
+    }
+  });
+
   const copyBtn = document.createElement('button');
   copyBtn.className = 'popup-copy-btn';
-  copyBtn.innerText = 'Copy';
+  copyBtn.innerText = ' Copy ';
   copyBtn.title = 'Copy to clipboard';
   copyBtn.addEventListener('click', () => {
     navigator.clipboard.writeText(explanation);
@@ -98,9 +116,12 @@ function showPopup(explanation, selectedText) {
   header.appendChild(heading);
   header.appendChild(closeBtn);
 
+  footer.appendChild(feedbackInput);
+  footer.appendChild(copyBtn);
+
   popup.appendChild(header);
   popup.appendChild(content);
-  popup.appendChild(copyBtn);
+  popup.appendChild(footer);
 
   document.body.appendChild(popup);
 }
