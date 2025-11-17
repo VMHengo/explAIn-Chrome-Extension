@@ -3,7 +3,7 @@
     "name": "explAIn",
     "version": "1.0",
     "description": "Quickly get definitions or explanations using an AI model.",
-    "permissions": ["activeTab", "scripting", "storage", "tabs"],
+    "permissions": ["activeTab", "scripting", "tabs", "contextMenus", "storage"],
     "host_permissions": ["<all_urls>"],
     "background": {
         "service_worker": "background.js",

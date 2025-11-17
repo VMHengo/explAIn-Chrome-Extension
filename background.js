@@ -1,3 +1,19 @@
+// chrome.runtime.onInstalled.addListener(() => {
+//   chrome.contextMenus.create({
+//     id: "explain-text",
+//     title: "Explain selected text",
+//     contexts: ["selection"]
+//   });
+// });
+
+// chrome.contextMenus.onClicked.addListener((info, tab) => {
+//   if (info.menuItemId === "explain-text") {
+//     chrome.tabs.sendMessage(tab.id, { 
+//       action: "explainSelectedText" 
+//     });
+//   }
+// });
+
 chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
   if (message.action === 'explain' || message.action === 'sendFeedback') {
 

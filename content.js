@@ -5,17 +5,76 @@ console.log("content.js loaded"); // confirmation
 
 let explainButton;
 
+let isTouchSelecting = false;
+
+document.addEventListener("pointerdown", (e) => {
+  if (e.pointerType === "touch") {
+    isTouchSelecting = true;
+  }
+});
+
+document.addEventListener("selectionchange", () => {
+  if (!isTouchSelecting) return;
+
+  const selection = window.getSelection();
+  const selectedText = selection.toString().trim();
+
+  if (selectedText.length > 0) {
+    const range = selection.getRangeAt(0);
+    const rect = range.getBoundingClientRect();
+
+    showExplainButton(
+      rect.right + window.scrollX,
+      rect.top + window.scrollY,
+      selection,
+      selectedText,
+      window.location.href
+    );
+  }
+});
+
+document.addEventListener("pointerup", () => {
+  isTouchSelecting = false;
+});
+
+
 document.addEventListener('mouseup', (event) => {
+  handleMouseUp(event);
+});
+
+chrome.runtime.onMessage.addListener((message) => {
+  if (message.action === 'explainSelectedText'){
+    handleMouseUp();
+  }
+})
+
+function handleMouseUp(event = null) {
   const selection = window.getSelection();
   const selectedText = selection.toString().trim();
   const pageUrl = window.location.href;
 
-  if (selectedText.length > 0) {
-    showExplainButton(event.pageX, event.pageY, selection, selectedText, pageUrl);
+  let x,y;
+  if (event) {
+    x = event.pageX;
+    y = event.pageY;
   } else {
+    const range = selection.rangeCount ? selection.getRangeAt(0) : null;
+    if (range) {
+      const rect = range.getBoundingClientRect();
+      x = rect.right + window.scrollX;
+      y = rect.top + window.scrollY;
+    }
+  }
+
+  console.log("show button");
+  if (selectedText.length > 0) {
+    console.log(selectedText);
+    showExplainButton(x, y, selection, selectedText, pageUrl);
+  } else {
+    console.log("rejected")
     removeExplainButton();
   }
-});
+}
 
 function showExplainButton(x, y, selection, selectedText, pageUrl) {
   removeExplainButton();
